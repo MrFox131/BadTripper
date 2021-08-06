@@ -46,6 +46,12 @@ socket_manager = SocketManager()
 
 @app.websocket("/{url}")
 async def get_url(websocket: WebSocket, url: str):
+    if url.startswith("http://"):
+        url = "https://"+url[7:]
+    elif not url.startswith("https://"):
+        url = "https://" + url
+    url = '/'.join(url.split('/')[:3])
+
     await socket_manager.connect(websocket, url)
 
 
