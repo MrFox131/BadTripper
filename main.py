@@ -74,6 +74,9 @@ async def get_all_links_from_site_generator(domain_name: str):
     status, response = http.request(domain_name)
 
     set_of_links = set()
+    for link in BeautifulSoup(response, parse_only=SoupStrainer('link')):
+        if link.has_attr('href'):
+            yield link['href']
     for link in BeautifulSoup(response, parse_only=SoupStrainer('a')):
         if link.has_attr('href'):
             yield link['href']
