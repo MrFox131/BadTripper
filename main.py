@@ -18,9 +18,10 @@ class Connection:
         self.closed = False
         self.check()
 
-    def check(self):
+    async def check(self):
         pass
-        self.socket.close()
+        await self.socket.close()
+        self.closed = True
 
     def send(self):
         pass
@@ -32,6 +33,7 @@ class SocketManager:
 
     async def connect(self, websocket: WebSocket, url: str):
         await websocket.accept()
+        await websocket.send_json({"hello": "world"})
         self.connections.append(Connection(websocket, url))
         for conn in self.connections:
             if conn.closed:
@@ -43,8 +45,8 @@ socket_manager = SocketManager()
 
 
 @app.websocket("/{url}")
-def get_url(websocket: WebSocket, url: str):
-    socket_manager.connect(websocket, url)
+async def get_url(websocket: WebSocket, url: str):
+    await socket_manager.connect(websocket, url)
 
 
 # returns None if no match, returns matching name if full(bool is true) or partial(bool is false) match. Full match does
@@ -72,6 +74,9 @@ async def get_all_links_from_site_generator(domain_name: str):
     status, response = http.request(domain_name)
 
     set_of_links = set()
+    for link in BeautifulSoup(response, parse_only=SoupStrainer('link')):
+        if link.has_attr('href'):
+            yield link['href']
     for link in BeautifulSoup(response, parse_only=SoupStrainer('a')):
         if link.has_attr('href'):
             yield link['href']
