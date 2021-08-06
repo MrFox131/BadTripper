@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse
 from fuzzywuzzy import fuzz
 from typing import Optional
@@ -10,14 +10,38 @@ from free_zones import tropical_zones
 
 app = FastAPI()
 
-@app.get("/")
-def get_url(url: str):
-    return JSONResponse(
-        status_code=200,
-        content={
-            "hello": url
-        }
-    )
+
+class Connection:
+    def __init__(self, socket: WebSocket, url: str):
+        self.socket = socket
+        self.url = url
+        self.check()
+        self.closed = False
+
+    def check(self):
+        pass
+        self.socket.close()
+
+
+class SocketManager:
+    def __init__(self):
+        self.connections = []
+
+    def connect(self, websocket: WebSocket, url: str):
+        await websocket.accept()
+        self.connections.append(Connection(websocket, url))
+        for conn in self.connections:
+            if conn.closed:
+                self.connections.remove(conn)
+                del conn
+
+
+socket_manager = SocketManager()
+
+
+@app.ws("/{url}")
+def get_url(websocket: WebSocket, url: str):
+    socket_manager.connect(websocket, url)
 
 
 # returns None if no match, returns matching name if full(bool is true) or partial(bool is false) match. Full match does
@@ -47,8 +71,7 @@ def get_all_links_from_site_generator(domain_name: str):
     set_of_links = set()
     for link in BeautifulSoup(response, parse_only=SoupStrainer('a')):
         if link.has_attr('href'):
-            href_formatted = '/'.join(link['href'].split("/")[:3])
-            if href_formatted not in set_of_links:
-                set_of_links.add(href_formatted)
-                yield link['href']
-
+            yield link['href']
+    for img in BeautifulSoup(response, parse_only=SoupStrainer('img')):
+        if img.has_attr('src'):
+            yield img['src']
