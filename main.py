@@ -39,6 +39,7 @@ class Connection:
         if object == False:
             object = {"result": "No ssl"}
         else:
+            object = {"verified": check['verified']}
             if datetime.datetime(2021, 7, 26) > check['creation_date']:
                 object["old"] = True
             else:
