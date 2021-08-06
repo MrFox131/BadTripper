@@ -67,9 +67,9 @@ def print_basic_info(hostinfo, domain):
             "registrant_country" : domain.registrant_country,
             "commonname" : get_common_name(hostinfo.cert),
             "SAN" : get_alt_names(hostinfo.cert),
-            "creation_date" : domain.creation_date,
-            "expiration_date" : domain.expiration_date,
-            "last_updated" : domain.last_updated,
+            "creation_date" : str(domain.creation_date),
+            "expiration_date" : str(domain.expiration_date),
+            "last_updated" : str(domain.last_updated),
             "issuer" : get_issuer(hostinfo.cert),
             "verified" : bool(i in get_issuer(hostinfo.cert).split() for i in CA)
     }
@@ -94,9 +94,9 @@ def start(url: str):
             "name" : domain.name,
             "registrar" : domain.registrar,
             "registrant_country" : domain.registrant_country,
-            "creation_date" : domain.creation_date,
-            "expiration_date" : domain.expiration_date,
-            "last_updated" : domain.last_updated,
+            "creation_date" : str(domain.creation_date),
+            "expiration_date" : str(domain.expiration_date),
+            "last_updated" : str(domain.last_updated),
             "issuer" : False
         }
 

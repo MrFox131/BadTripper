@@ -1,5 +1,5 @@
 def punicode(name):
-    name = name.decode("idna").split(".")[:-1]
+    name = name.encode("utf-8").decode("idna").split(".")[:-1]
     is_ascii_used = False
     is_unicode_used = False
     for y in name:
