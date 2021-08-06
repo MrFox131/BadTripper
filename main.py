@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse
 from fuzzywuzzy import fuzz
-from typing import Optional
+from typing import Optional, Tuple, Union, Any
 import httplib2
 from bs4 import BeautifulSoup, SoupStrainer
 
@@ -30,7 +30,7 @@ class SocketManager:
     def __init__(self):
         self.connections = []
 
-    def connect(self, websocket: WebSocket, url: str):
+    async def connect(self, websocket: WebSocket, url: str):
         await websocket.accept()
         self.connections.append(Connection(websocket, url))
         for conn in self.connections:
@@ -49,7 +49,7 @@ def get_url(websocket: WebSocket, url: str):
 
 # returns None if no match, returns matching name if full(bool is true) or partial(bool is false) match. Full match does
 # NOT guarantee positive result
-async def check_on_domain_name_be_alike(domain_name: str) -> Optional[(str, bool)]:
+async def check_on_domain_name_be_alike(domain_name: str) -> Optional[tuple[Any, bool]]:
     original_name_without_zone = '.'.join(domain_name.split(".")[:-1])
     for checking_name in popular_sites:
         name_without_domain_zone = '.'.join(checking_name.split(".")[:-1])
