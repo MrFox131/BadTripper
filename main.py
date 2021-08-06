@@ -10,6 +10,7 @@ import speller
 import punicode_tester
 import forwarding
 import time
+import datetime
 
 from sites_db import popular_sites
 from free_zones import tropical_zones
@@ -33,9 +34,15 @@ class Connection:
         object = {"result": await check_on_domain_name_be_alike(self.url)}
         object["id"] = "DomainNearPopular"
         await self.socket.send_json(object)
-        object = SSL_check.start(self.url)
+        object = {"result": "have ssl"}
+        check = SSL_check.start(self.url)
         if object == False:
             object = {"result": "No ssl"}
+        else:
+            if datetime.datetime(2021, 7, 26) > check['creation_date']:
+                object["old"] = True
+            else:
+                object["old"] = False
         object["id"] = "SslAndDomainAge"
         await self.socket.send_json(object)
         object ={"result": speller.speller(self.url)}
@@ -88,7 +95,7 @@ async def get_url(websocket: WebSocket, url: str):
 
 # returns None if no match, returns matching name if full(bool is true) or partial(bool is false) match. Full match does
 # NOT guarantee positive result
-async def check_on_domain_name_be_alike(domain_name: str) -> Optional[tuple[Any, bool]]:
+async def check_on_domain_name_be_alike(domain_name: str):
     original_name_without_zone = '.'.join(domain_name.split(".")[:-1])
     for checking_name in popular_sites:
         name_without_domain_zone = '.'.join(checking_name.split(".")[:-1])

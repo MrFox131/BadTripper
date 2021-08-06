@@ -19,25 +19,26 @@ CA = [
 
 
 def get_certificate(hostname, port):
-    try:
-        hostname_idna = idna.encode(hostname)   #https://guix.gnu.org/packages/python-idna-2.10/
-        sock = socket()
-        sock.connect((hostname, port))
-        peername = sock.getpeername()
-        ctx = SSL.Context(SSL.SSLv23_METHOD) # most compatible
-        ctx.check_hostname = False
-        ctx.verify_mode = SSL.VERIFY_NONE
-        sock_ssl = SSL.Connection(ctx, sock)
-        sock_ssl.set_connect_state()
-        sock_ssl.set_tlsext_host_name(hostname_idna)
-        sock_ssl.do_handshake()
-        cert = sock_ssl.get_peer_certificate()
-        crypto_cert = cert.to_cryptography()
-        sock_ssl.close()
-        sock.close()
-        return HostInfo(cert=crypto_cert, peername=peername, hostname=hostname)
-    except:
-        return False
+    
+hostname_idna = idna.encode(hostname)   #https://guix.gnu.org/packages/python-idna-2.10/
+    sock = socket()
+
+    sock.connect((hostname, port))
+    peername = sock.getpeername()
+    ctx = SSL.Context(SSL.SSLv23_METHOD) # most compatible
+    ctx.check_hostname = False
+    ctx.verify_mode = SSL.VERIFY_NONE
+    sock_ssl = SSL.Connection(ctx, sock)
+    sock_ssl.set_connect_state()
+    sock_ssl.set_tlsext_host_name(hostname_idna)
+    sock_ssl.do_handshake()
+    cert = sock_ssl.get_peer_certificate()
+    crypto_cert = cert.to_cryptography()
+    sock_ssl.close()
+    sock.close()
+
+    return HostInfo(cert=crypto_cert, peername=peername, hostname=hostname)
+
 def get_alt_names(cert):
     try:
         ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
@@ -67,7 +68,7 @@ def print_basic_info(hostinfo, domain):
             "registrant_country" : domain.registrant_country,
             "commonname" : get_common_name(hostinfo.cert),
             "SAN" : get_alt_names(hostinfo.cert),
-            "creation_date" : domain.creation_date,
+            "creation_date" : str(domain.creation_date),
             "expiration_date" : str(domain.expiration_date),
             "last_updated" : str(domain.last_updated),
             "issuer" : get_issuer(hostinfo.cert),
@@ -84,9 +85,6 @@ def check_it_out(hostname, port): #check одного адреса
 def start(url: str):
     try:
         url_ready = url.split('/')[2 if url.startswith("http") else 0]
-        hostnamew = idna.encode(url_ready)
-        sock = socket()
-        sock.connect((url_ready, 443))
         x = check_it_out(url_ready, 443)
         return x
 
@@ -97,7 +95,7 @@ def start(url: str):
             "name" : domain.name,
             "registrar" : domain.registrar,
             "registrant_country" : domain.registrant_country,
-            "creation_date" : domain.creation_date,
+            "creation_date" : str(domain.creation_date),
             "expiration_date" : str(domain.expiration_date),
             "last_updated" : str(domain.last_updated),
             "issuer" : False
