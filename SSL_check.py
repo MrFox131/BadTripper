@@ -72,17 +72,15 @@ def print_basic_info(hostinfo, domain):
             "issuer" : get_issuer(hostinfo.cert),
             "verified" : bool(i in get_issuer(hostinfo.cert).split() for i in CA)
     }
-    with open('ssl', 'w') as f:
-        for value, key in s.items():
-            x = value, key
-            f.write(str(x) + '\n')
+    
+    return s
 
 def check_it_out(hostname, port): #check одного адреса
     domain = whois.query(hostname)
     hostinfo = get_certificate(hostname, port)
     print_basic_info(hostinfo, domain)
 
-def start(url):if __name__ == '__main__':  #check пачки адресов
+def start(url):
     try:
         
         hostname = 'letoctf.org'
@@ -101,11 +99,10 @@ def start(url):if __name__ == '__main__':  #check пачки адресов
             "issuer" : False
         }
 
-        with open('ssl', 'w') as f:
-            for value, key in s.items():
-                x = value, key
-                f.write(str(x) + '\n')    
+        return s   
 
     except Exception as e:
-        print('Ошибка')
-start()
+        return False
+
+x = start('google.com')
+print(x)
