@@ -9,6 +9,7 @@ from collections import namedtuple
 import whois
 
 
+
 HostInfo = namedtuple(field_names='cert hostname peername', typename='HostInfo')
 
 
@@ -78,16 +79,16 @@ def print_basic_info(hostinfo, domain):
 def check_it_out(hostname, port): #check одного адреса
     domain = whois.query(hostname)
     hostinfo = get_certificate(hostname, port)
-    print_basic_info(hostinfo, domain)
+    return print_basic_info(hostinfo, domain)
 
-def start(url):
+def start(url: str):
     try:
-        
-        hostname = 'letoctf.org'
-        check_it_out(hostname, 443)
+        url_ready = url.split('/')[2 if url.startswith("http") else 0]
+        print(url_ready)
+        return check_it_out(url_ready, 443)
 
     except SSL.Error:
-        domain = whois.query(hostname)
+        domain = whois.query(url_ready)
 
         s = {
             "name" : domain.name,
@@ -102,7 +103,5 @@ def start(url):
         return s   
 
     except Exception as e:
+        print(e)
         return False
-
-x = start('google.com')
-print(x)
