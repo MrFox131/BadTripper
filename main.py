@@ -15,12 +15,15 @@ class Connection:
     def __init__(self, socket: WebSocket, url: str):
         self.socket = socket
         self.url = url
-        self.check()
         self.closed = False
+        self.check()
 
     def check(self):
         pass
         self.socket.close()
+
+    def send(self):
+        pass
 
 
 class SocketManager:
@@ -39,14 +42,14 @@ class SocketManager:
 socket_manager = SocketManager()
 
 
-@app.ws("/{url}")
+@app.websocket("/{url}")
 def get_url(websocket: WebSocket, url: str):
     socket_manager.connect(websocket, url)
 
 
 # returns None if no match, returns matching name if full(bool is true) or partial(bool is false) match. Full match does
 # NOT guarantee positive result
-def check_on_domain_name_be_alike(domain_name: str) -> Optional[(str, bool)]:
+async def check_on_domain_name_be_alike(domain_name: str) -> Optional[(str, bool)]:
     original_name_without_zone = '.'.join(domain_name.split(".")[:-1])
     for checking_name in popular_sites:
         name_without_domain_zone = '.'.join(checking_name.split(".")[:-1])
@@ -59,12 +62,12 @@ def check_on_domain_name_be_alike(domain_name: str) -> Optional[(str, bool)]:
 
 
 # returns true if domain is free by default
-def check_domain_zone(domain_name: str):
+async def check_domain_zone(domain_name: str):
     return domain_name.split(".")[-1] in tropical_zones
 
 
 # generates all links from current page
-def get_all_links_from_site_generator(domain_name: str):
+async def get_all_links_from_site_generator(domain_name: str):
     http = httplib2.Http()
     status, response = http.request(domain_name)
 
