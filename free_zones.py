@@ -1,0 +1,1 @@
+tropical_zones = ["tk","cf","ml","ga","gq"]
